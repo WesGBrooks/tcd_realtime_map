@@ -7,32 +7,32 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 # Configure page to use full width and hide sidebar
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
-# Hide sidebar hamburger menu
-st.markdown(
-    """
-    <style>
-        [data-testid="collapsedControl"] {
-            display: none
-        }
+# # Hide sidebar hamburger menu
+# st.markdown(
+#     """
+#     <style>
+#         [data-testid="collapsedControl"] {
+#             display: none
+#         }
         
-        /* Make the map container full width */
-        .element-container:has(>.stDecoration) {
-            width: 100%;
-            padding: 0;
-            margin: 0;
-        }
+#         /* Make the map container full width */
+#         .element-container:has(>.stDecoration) {
+#             width: 100%;
+#             padding: 0;
+#             margin: 0;
+#         }
         
-        /* Remove default padding */
-        .main > .block-container {
-            padding-top: 0;
-            padding-bottom: 0;
-            padding-left: 0;
-            padding-right: 0;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+#         /* Remove default padding */
+#         .main > .block-container {
+#             padding-top: 0;
+#             padding-bottom: 0;
+#             padding-left: 0;
+#             padding-right: 0;
+#         }
+#     </style>
+#     """,
+#     unsafe_allow_html=True,
+# )
 
 # Initialize the geocoder
 geolocator = Nominatim(user_agent="venture_app")
