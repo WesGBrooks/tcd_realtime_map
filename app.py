@@ -7,33 +7,6 @@ from geopy.exc import GeocoderTimedOut, GeocoderServiceError
 # Configure page to use full width and hide sidebar
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
-# # Hide sidebar hamburger menu
-# st.markdown(
-#     """
-#     <style>
-#         [data-testid="collapsedControl"] {
-#             display: none
-#         }
-        
-#         /* Make the map container full width */
-#         .element-container:has(>.stDecoration) {
-#             width: 100%;
-#             padding: 0;
-#             margin: 0;
-#         }
-        
-#         /* Remove default padding */
-#         .main > .block-container {
-#             padding-top: 0;
-#             padding-bottom: 0;
-#             padding-left: 0;
-#             padding-right: 0;
-#         }
-#     </style>
-#     """,
-#     unsafe_allow_html=True,
-# )
-
 # Initialize the geocoder
 geolocator = Nominatim(user_agent="venture_app")
 
@@ -86,16 +59,11 @@ def load_public_sheet_data():
         st.error(f"Error loading sheet: {str(e)}")
         return None
 
-# Create a placeholder for the map
-map_placeholder = st.empty()
+# Load and display the data
+df = load_public_sheet_data()
+if df is not None:
+    st.map(df)
 
-# Main loop to refresh the map
-while True:
-    # Load and display the data
-    df = load_public_sheet_data()
-    if df is not None:
-        with map_placeholder:
-            st.map(df)
-    
-    # Wait for 30 seconds before refreshing
-    time.sleep(30)
+# Wait for 15 seconds and rerun
+time.sleep(15)
+st.rerun()
