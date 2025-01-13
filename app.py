@@ -74,7 +74,9 @@ if df is not None:
         longitude='longitude',
         color='#FFCC00BF',  # Yellow with 75% opacity 
         # or use color = 'color' for random colors
-        size=5000  # Large dot size
+        size=5000,  # Large dot size,
+        use_container_width=True,
+        zoom=2
     )
 
 # Wait for 15 seconds and rerun
