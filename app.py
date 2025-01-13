@@ -12,8 +12,8 @@ st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 geolocator = Nominatim(user_agent="venture_app")
 
 def generate_random_color():
-    """Generate a random color in hex format"""
-    return '#{:06x}'.format(random.randint(0, 0xFFFFFF))
+    """Generate a random color in hex format with 75% opacity"""
+    return '#{:06x}BF'.format(random.randint(0, 0xFFFFFF))
 
 def geocode_address(city, state, country):
     """Geocode an address using city, state, and country"""
@@ -73,8 +73,9 @@ if df is not None:
         df,
         latitude='latitude',
         longitude='longitude',
-        color='color',
-        size=25  # Increase dot size
+        color='#FFCC00BF',  # Yellow with 75% opacity 
+        # or use color = 'color' for random colors
+        size=5000  # Large dot size
     )
 
 # Wait for 15 seconds and rerun
