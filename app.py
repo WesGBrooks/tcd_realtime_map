@@ -31,7 +31,7 @@ def geocode_address(city, state, country):
 # Function to load and process data from public Google Sheet
 def load_public_sheet_data():
     try:
-        url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRTs5ezNNxS0uBx7Y1jIkJpQHlDfykKPNHPpVlNwAWp5uzS2dKaLg22_p9WpeC0w9Ax7cTPsoGwI3iA/pub?output=csv'
+        url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSze68vYCM-BtlfuWVgzY6Wayf3Ry0k3o0mR7yDM5lYbvtSU_k3hu4V0uPiy0Akum64qSD2Lm8QFIGl/pub?output=csv'
         
         # Read the sheet directly into a dataframe
         df = pd.read_csv(url)
@@ -45,7 +45,8 @@ def load_public_sheet_data():
         # Geocode addresses that don't have coordinates
         for idx, row in df.iterrows():
             if pd.isna(row['latitude']) or pd.isna(row['longitude']):
-                lat, lon = geocode_address(row['City'], row['State'], row['Country'])
+                # Note the column names match exactly with the sheet
+                lat, lon = geocode_address(row['City:'], row['State or Province'], row['Country:'])
                 if lat and lon:
                     df.at[idx, 'latitude'] = lat
                     df.at[idx, 'longitude'] = lon
