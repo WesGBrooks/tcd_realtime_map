@@ -1,15 +1,14 @@
 import streamlit as st
 import pandas as pd
 import time
-from geopy.geocoders import Nominatim
-from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+from geopy.geocoders import ArcGIS
 import random
 
 # Configure page to use full width and hide sidebar
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
 # Initialize the geocoder
-geolocator = Nominatim(user_agent="venture_app")
+geolocator = ArcGIS(user_agent="tcd_realtime_map")
 
 def generate_random_color():
     """Generate a random color in hex format with 75% opacity"""
@@ -28,8 +27,8 @@ def geocode_address(city, state, country):
             return location.latitude, location.longitude
         return None, None
         
-    except (GeocoderTimedOut, GeocoderServiceError):
-        # Handle timeout errors
+    except Exception as e:
+        print(f"Geocoding error for {address}: {str(e)}")
         time.sleep(1)  # Wait a second before returning
         return None, None
 
@@ -55,7 +54,7 @@ def load_public_sheet_data():
                 if lat and lon:
                     df.at[idx, 'latitude'] = lat
                     df.at[idx, 'longitude'] = lon
-                    time.sleep(1)  # Be nice to the geocoding service
+                    time.sleep(0.5)  # Be nice to the geocoding service
         
         # Drop rows with missing coordinates
         df = df.dropna(subset=['latitude', 'longitude'])
