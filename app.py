@@ -3,12 +3,17 @@ import pandas as pd
 import time
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
+import random
 
 # Configure page to use full width and hide sidebar
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
 # Initialize the geocoder
 geolocator = Nominatim(user_agent="venture_app")
+
+def generate_random_color():
+    """Generate a random color in hex format"""
+    return '#{:06x}'.format(random.randint(0, 0xFFFFFF))
 
 def geocode_address(city, state, country):
     """Geocode an address using city, state, and country"""
@@ -28,7 +33,6 @@ def geocode_address(city, state, country):
         time.sleep(1)  # Wait a second before returning
         return None, None
 
-# Function to load and process data from public Google Sheet
 def load_public_sheet_data():
     try:
         url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSze68vYCM-BtlfuWVgzY6Wayf3Ry0k3o0mR7yDM5lYbvtSU_k3hu4V0uPiy0Akum64qSD2Lm8QFIGl/pub?output=csv'
@@ -41,11 +45,12 @@ def load_public_sheet_data():
             df['latitude'] = None
         if 'longitude' not in df.columns:
             df['longitude'] = None
+        if 'color' not in df.columns:
+            df['color'] = [generate_random_color() for _ in range(len(df))]
         
         # Geocode addresses that don't have coordinates
         for idx, row in df.iterrows():
             if pd.isna(row['latitude']) or pd.isna(row['longitude']):
-                # Note the column names match exactly with the sheet
                 lat, lon = geocode_address(row['City:'], row['State or Province'], row['Country:'])
                 if lat and lon:
                     df.at[idx, 'latitude'] = lat
@@ -63,8 +68,15 @@ def load_public_sheet_data():
 # Load and display the data
 df = load_public_sheet_data()
 if df is not None:
-    st.map(df)
+    # Create the map with custom styling
+    st.map(
+        df,
+        latitude='latitude',
+        longitude='longitude',
+        color='color',
+        size=25  # Increase dot size
+    )
 
 # Wait for 15 seconds and rerun
-time.sleep(15)
+time.sleep(10)
 st.rerun()
