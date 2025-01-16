@@ -2,34 +2,54 @@ import streamlit as st
 import pandas as pd
 import time
 from geopy.geocoders import ArcGIS
+from geopy.extra.rate_limiter import RateLimiter
 import random
+import json
+import os
 
 # Configure page to use full width and hide sidebar
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
-# Initialize the geocoder
-geolocator = ArcGIS(user_agent="tcd_realtime_map")
+# Initialize session state for geocoding cache if it doesn't exist
+if 'geocode_cache' not in st.session_state:
+    st.session_state.geocode_cache = {}
+
+# Initialize the geocoder with increased timeout
+geolocator = ArcGIS(user_agent="tcd_realtime_map", timeout=10)
+
+# Create a rate-limited version of the geocoding function
+geocode = RateLimiter(geolocator.geocode, 
+                      min_delay_seconds=0.5,
+                      max_retries=3,
+                      error_wait_seconds=2.0)
 
 def generate_random_color():
     """Generate a random color in hex format with 75% opacity"""
     return '#{:06x}BF'.format(random.randint(0, 0xFFFFFF))
 
 def geocode_address(city, state, country):
-    """Geocode an address using city, state, and country"""
+    """Geocode an address using city, state, and country with caching"""
     try:
         # Construct address string
         address = f"{city}, {state}, {country}"
         
-        # Get location
-        location = geolocator.geocode(address)
+        # Check cache first
+        if address in st.session_state.geocode_cache:
+            return st.session_state.geocode_cache[address]
+        
+        # Get location with rate limiting and retries
+        location = geocode(address)
         
         if location:
-            return location.latitude, location.longitude
+            # Store in cache
+            coords = (location.latitude, location.longitude)
+            st.session_state.geocode_cache[address] = coords
+            return coords
+            
         return None, None
         
     except Exception as e:
         print(f"Geocoding error for {address}: {str(e)}")
-        time.sleep(1)  # Wait a second before returning
         return None, None
 
 def load_public_sheet_data():
@@ -54,7 +74,6 @@ def load_public_sheet_data():
                 if lat and lon:
                     df.at[idx, 'latitude'] = lat
                     df.at[idx, 'longitude'] = lon
-                    time.sleep(0.5)  # Be nice to the geocoding service
         
         # Drop rows with missing coordinates
         df = df.dropna(subset=['latitude', 'longitude'])
@@ -72,9 +91,8 @@ if df is not None:
         df,
         latitude='latitude',
         longitude='longitude',
-        color='#FFCC00BF',  # Yellow with 75% opacity 
-        # or use color = 'color' for random colors
-        size=5000,  # Large dot size,
+        color='#FFCC00BF',  # Yellow with 75% opacity
+        size=5000,  # Large dot size
         use_container_width=True,
         zoom=2
     )
